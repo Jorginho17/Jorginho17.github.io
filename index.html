@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Race Spel</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #000;
+            height: 100vh;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        #game-container {
+            position: relative;
+            width: 400px;
+            height: 600px;
+            background-color: #333;
+            overflow: hidden;
+            border: 2px solid white;
+        }
+
+        #player {
+            position: absolute;
+            bottom: 20px;
+            left: 180px;
+            width: 40px;
+            height: 80px;
+            background-color: red;
+            border-radius: 5px;
+        }
+
+        .obstacle {
+            position: absolute;
+            width: 40px;
+            height: 80px;
+            background-color: yellow;
+            border-radius: 5px;
+        }
+
+        #scoreboard {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="scoreboard">Score: 0</div>
+        <div id="player"></div>
+    </div>
+
+    <script>
+        const gameContainer = document.getElementById("game-container");
+        const player = document.getElementById("player");
+        const scoreboard = document.getElementById("scoreboard");
+
+        let playerX = 180; // Startpositie van de auto
+        let score = 0;
+
+        // Beweeg de spelerauto
+        document.addEventListener("keydown", (e) => {
+            const step = 20; // Beweegafstand per toets
+            if (e.key === "ArrowLeft" && playerX > 0) {
+                playerX -= step;
+            } else if (e.key === "ArrowRight" && playerX < gameContainer.offsetWidth - player.offsetWidth) {
+                playerX += step;
+            }
+            player.style.left = playerX + "px";
+        });
+
+        // Maak obstakels
+        function createObstacle() {
+            const obstacle = document.createElement("div");
+            obstacle.classList.add("obstacle");
+            obstacle.style.left = Math.floor(Math.random() * (gameContainer.offsetWidth - 40)) + "px";
+            obstacle.style.top = "0px";
+            gameContainer.appendChild(obstacle);
+
+            // Beweeg het obstakel
+            const obstacleInterval = setInterval(() => {
+                const obstacleTop = parseInt(obstacle.style.top);
+                if (obstacleTop > gameContainer.offsetHeight) {
+                    obstacle.remove();
+                    clearInterval(obstacleInterval);
+                    score++;
+                    scoreboard.textContent = `Score: ${score}`;
+                } else {
+                    obstacle.style.top = obstacleTop + 5 + "px";
+
+                    // Controleer op botsing
+                    const playerRect = player.getBoundingClientRect();
+                    const obstacleRect = obstacle.getBoundingClientRect();
+
+                    if (
+                        playerRect.left < obstacleRect.right &&
+                        playerRect.right > obstacleRect.left &&
+                        playerRect.top < obstacleRect.bottom &&
+                        playerRect.bottom > obstacleRect.top
+                    ) {
+                        alert(`Game over! Je score is: ${score}`);
+                        window.location.reload();
+                    }
+                }
+            }, 20);
+        }
+
+        // Start het spel
+        setInterval(createObstacle, 1500); // Maak elke 1,5 seconden een nieuw obstakel
+    </script>
+</body>
+</html>
+
